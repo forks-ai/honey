@@ -21,14 +21,25 @@ const LIFETIME = 5 * 365 * 24 * 3600;
 const PUE = 1.2;
 
 function loadConfig() {
-  return JSON.parse(fs.readFileSync(path.join(__dirname, "eco-config.json"), "utf8"));
+  const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, "eco-config.json"), "utf8"));
+  cfg._registry = JSON.parse(
+    fs.readFileSync(path.join(__dirname, "eco-models.json"), "utf8")
+  ).models;
+  return cfg;
 }
 
-// Resolve a model id ("claude-opus-4-8", "claude-3-5-haiku-...") to assumed params.
+// Resolve a model id to {active, total, provider} using EcoLogits' registry:
+// exact name -> else first alias substring -> else default_alias. Params are
+// always the registry's, never hand-typed.
 function resolveParams(model, cfg) {
-  const id = String(model || "").toLowerCase();
-  for (const m of cfg.models) if (m.match.some((s) => id.includes(s))) return m;
-  return cfg.default_model;
+  const reg = cfg._registry;
+  const id = String(model || "");
+  if (reg[id]) return reg[id];
+  const lid = id.toLowerCase();
+  for (const a of cfg.aliases) {
+    if (a.match.some((s) => lid.includes(s)) && reg[a.registry]) return reg[a.registry];
+  }
+  return reg[cfg.default_alias];
 }
 
 // EcoLogits mean impacts for one generation. grid in kgCO2eq/kWh. request_latency=inf.

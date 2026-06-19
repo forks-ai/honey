@@ -1,8 +1,8 @@
 {
-  "_about": "Assumptions behind Honey's CO2 estimate. Edit freely.",
-  "_engine": "Faithful port of EcoLogits v0.8.2 (genai-impact/ecologits, MIT). scripts/eco_report.py runs the real package for an authoritative breakdown.",
-  "_params_note": "SPECULATIVE — no lab discloses parameter counts. active/total are best-guess billions from tier/pricing. Change them and the badge updates.",
-  "_grid_note": "Per-provider, since they run in different clouds: Anthropic on AWS Trainium (Project Rainier PA/IN/MS ~500), OpenAI on Azure US (~400), Google on GCP (cleaner ~330). Location-based; market-based (renewable PPAs) would be lower.",
+  "_about": "Honey CO2 estimate config. Model params come from EcoLogits' registry (hooks/eco-models.json), NOT hand estimates. This file only holds: grids, savings, and aliases for frontier models too new for the registry.",
+  "_engine": "Faithful port of EcoLogits v0.8.2 (genai-impact/ecologits, MIT). scripts/eco_report.py runs the real package for the authoritative breakdown.",
+  "_match": "A model id is resolved by: (1) exact name in eco-models.json, else (2) first alias whose 'match' substring appears in the id -> borrow that registry model's params, else (3) default_alias. Params and provider always come from the registry.",
+  "_grid_note": "Per-provider, location-based. Anthropic on AWS Trainium (Project Rainier PA/IN/MS ~500), OpenAI on Azure (~400), Google on GCP (~330). Researched, not from EcoLogits; market-based (renewable PPAs) would be lower.",
   "grids_gco2_per_kwh": {
     "anthropic": 500,
     "openai": 400,
@@ -13,13 +13,15 @@
   "_savings_note": "Token reduction vs a no-Honey baseline. 'full' = 0.57 from the README benchmark (Opus 4.8, 20 tasks x3). lite/ultra are estimates.",
   "savings_vs_baseline": { "lite": 0.35, "full": 0.57, "ultra": 0.65 },
 
-  "default_model": { "active": 100, "total": 300, "provider": "default" },
-  "models": [
-    { "match": ["haiku"],          "active": 10,  "total": 10,   "provider": "anthropic" },
-    { "match": ["sonnet"],         "active": 100, "total": 300,  "provider": "anthropic" },
-    { "match": ["opus"],           "active": 400, "total": 1500, "provider": "anthropic" },
-    { "match": ["gpt-5", "codex", "o3", "o4"], "active": 200, "total": 1000, "provider": "openai" },
-    { "match": ["gpt-4", "gpt-3"], "active": 100, "total": 400,  "provider": "openai" },
-    { "match": ["gemini"],         "active": 100, "total": 400,  "provider": "google" }
+  "_aliases_note": "For ids newer than the registry. Each points at the closest registry model whose EcoLogits params we borrow.",
+  "default_alias": "gpt-4o",
+  "aliases": [
+    { "match": ["opus"],            "registry": "claude-opus-4-1" },
+    { "match": ["sonnet"],          "registry": "claude-sonnet-4-0" },
+    { "match": ["haiku"],           "registry": "claude-3-5-haiku-latest" },
+    { "match": ["gpt-5", "codex"],  "registry": "gpt-5" },
+    { "match": ["gpt-4.1"],         "registry": "gpt-4.1" },
+    { "match": ["gpt-4", "o3", "o4", "o1"], "registry": "gpt-4o" },
+    { "match": ["gemini"],          "registry": "gemini-2.0-flash" }
   ]
 }

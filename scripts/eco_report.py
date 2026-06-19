@@ -14,14 +14,19 @@ import argparse, glob, json, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CFG = json.load(open(os.path.join(HERE, "..", "hooks", "eco-config.json")))
+REG = json.load(open(os.path.join(HERE, "..", "hooks", "eco-models.json")))["models"]
 
 
 def resolve(model):
-    mid = (model or "").lower()
-    for m in CFG["models"]:
-        if any(s in mid for s in m["match"]):
-            return m
-    return CFG["default_model"]
+    """Params from EcoLogits' registry: exact -> alias substring -> default."""
+    mid = model or ""
+    if mid in REG:
+        return REG[mid]
+    low = mid.lower()
+    for a in CFG["aliases"]:
+        if any(s in low for s in a["match"]) and a["registry"] in REG:
+            return REG[a["registry"]]
+    return REG[CFG["default_alias"]]
 
 
 def newest_transcript():

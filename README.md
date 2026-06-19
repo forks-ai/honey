@@ -99,11 +99,13 @@ session and the **CO₂/$ saved** vs a no-Honey baseline:
 ```
 
 The estimate is a faithful port of [EcoLogits](https://github.com/genai-impact/ecologits)
-v0.8.2 (verified to match the package exactly). Params **and grid switch per
-provider** — Anthropic on AWS Trainium (~500 gCO₂/kWh), OpenAI on Azure (~400),
-Google on GCP (~330) — matched from the model id. All inputs (assumed params,
-per-provider grids, per-mode savings) live in
-[`hooks/eco-config.json`](hooks/eco-config.json); edit and the badge updates.
+v0.8.2 (verified to match the package exactly). **Model params come from
+EcoLogits' own registry** ([`hooks/eco-models.json`](hooks/eco-models.json),
+exported by [`scripts/build-eco-models.py`](scripts/build-eco-models.py)) — matched
+by exact id, falling back to a per-family alias for frontier models too new for
+the registry. **Grid switches per provider** — Anthropic on AWS Trainium (~500
+gCO₂/kWh), OpenAI on Azure (~400), Google on GCP (~330). Aliases, grids, and
+per-mode savings live in [`hooks/eco-config.json`](hooks/eco-config.json).
 
 The badge itself renders **only in Claude Code** (it reads Claude Code's
 transcript, where every model is a Claude model). The provider switching matters
