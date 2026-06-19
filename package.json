@@ -1,0 +1,25 @@
+{
+  "name": "honey-skill",
+  "version": "1.0.0",
+  "description": "Honey (I Shrunk the AI) — write less code and say less about it. A coding skill that cuts agent token cost across every major AI coding tool.",
+  "license": "MIT",
+  "repository": "github:Green-PT/Honey-I-Shrunk-the-AI",
+  "homepage": "https://github.com/Green-PT/Honey-I-Shrunk-the-AI",
+  "bin": {
+    "honey-install": "bin/install.js"
+  },
+  "scripts": {
+    "build": "node scripts/build-rules.js",
+    "check": "node scripts/build-rules.js --check",
+    "test": "node scripts/build-rules.js --check"
+  },
+  "files": [
+    "bin",
+    "hooks",
+    "scripts",
+    "skills",
+    "commands",
+    ".claude-plugin",
+    "AGENTS.md"
+  ]
+}

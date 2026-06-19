@@ -1,0 +1,22 @@
+{
+  "name": "honey",
+  "owner": {
+    "name": "Green-PT",
+    "url": "https://github.com/Green-PT"
+  },
+  "metadata": {
+    "description": "Honey (I Shrunk the AI) — write less code and say less about it.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "honey",
+      "source": "./",
+      "description": "Reflexive minimal-code (YAGNI/stdlib-first) + terse-prose discipline that cuts agent token cost while keeping correctness and safety-critical paths exact. Auto-intensity: lite/full/ultra.",
+      "version": "1.0.0",
+      "author": { "name": "Green-PT" },
+      "license": "MIT",
+      "keywords": ["tokens", "yagni", "minimal", "concise", "cost", "terse"]
+    }
+  ]
+}

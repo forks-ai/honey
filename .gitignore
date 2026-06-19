@@ -1,0 +1,13 @@
+# Benchmark workspace — kept local, never published
+benchmark/
+
+# macOS
+.DS_Store
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Local Honey state (created at runtime, not source)
+.honey-active
