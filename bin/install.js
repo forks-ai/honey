@@ -122,11 +122,11 @@ const CLI_AGENTS = [
     detect: () => which("claude") || dirExists(CLAUDE_DIR),
     install: () => {
       run("claude plugin marketplace add " + SLUG);
-      run("claude plugin install honey@honey");
+      run("claude plugin install honey@greenpt");
       installStatusline();
     },
     uninstall: () => {
-      run("claude plugin uninstall honey@honey");
+      run("claude plugin uninstall honey@greenpt");
       removeStatusline();
     },
   },
@@ -139,7 +139,7 @@ const CLI_AGENTS = [
       note("  then enable honey via Codex `/plugins` UI");
       copy("AGENTS.md", path.join(HOME, ".codex", "AGENTS.md"));
     },
-    uninstall: () => run("codex plugin uninstall honey@honey"),
+    uninstall: () => run("codex plugin uninstall honey@greenpt"),
   },
   {
     id: "copilot",
@@ -147,9 +147,9 @@ const CLI_AGENTS = [
     detect: () => which("copilot"),
     install: () => {
       run("copilot plugin marketplace add " + SLUG);
-      run("copilot plugin install honey@honey");
+      run("copilot plugin install honey@greenpt");
     },
-    uninstall: () => run("copilot plugin uninstall honey@honey"),
+    uninstall: () => run("copilot plugin uninstall honey@greenpt"),
   },
   {
     id: "gemini",

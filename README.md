@@ -47,7 +47,7 @@ Claude Code.
 
 ```
 /plugin marketplace add Green-PT/honey-for-devs
-/plugin install honey@honey
+/plugin install honey@greenpt
 ```
 
 Then `/honey` to turn it on (`/honey lite|full|ultra` to set intensity,
@@ -74,9 +74,9 @@ repo. Requires Node.js on your PATH. Safe to re-run; skips tools you don't have.
 
 | Platform | Install |
 |----------|---------|
-| Claude Code | `/plugin marketplace add Green-PT/honey-for-devs` then `/plugin install honey@honey` |
+| Claude Code | `/plugin marketplace add Green-PT/honey-for-devs` then `/plugin install honey@greenpt` |
 | Codex | `codex plugin marketplace add Green-PT/honey-for-devs` then enable via `/plugins` |
-| GitHub Copilot CLI | `copilot plugin marketplace add Green-PT/honey-for-devs` then `copilot plugin install honey@honey` |
+| GitHub Copilot CLI | `copilot plugin marketplace add Green-PT/honey-for-devs` then `copilot plugin install honey@greenpt` |
 | Gemini CLI | `gemini extensions install https://github.com/Green-PT/honey-for-devs` |
 | Cursor | copy `.cursor/rules/honey.mdc` into your project |
 | Windsurf | copy `.windsurf/rules/honey.md` into your project |

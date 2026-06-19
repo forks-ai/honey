@@ -15,7 +15,7 @@ you have, or a manual per-tool copy. Pick whichever fits.
 
 ```
 /plugin marketplace add Green-PT/honey-for-devs
-/plugin install honey@honey
+/plugin install honey@greenpt
 ```
 
 This installs the `honey` skill, the `/honey` command, and a SessionStart hook
@@ -99,5 +99,5 @@ curl -fsSL https://raw.githubusercontent.com/Green-PT/honey-for-devs/main/instal
 node bin/install.js --uninstall
 ```
 
-In Claude Code you can also run `/plugin uninstall honey@honey`. Per-repo rule
+In Claude Code you can also run `/plugin uninstall honey@greenpt`. Per-repo rule
 files you copied are left in place — delete them manually if you want them gone.
