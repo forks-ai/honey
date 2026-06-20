@@ -5,16 +5,21 @@ inclusion: always
 
 # Honey (I Shrunk the AI)
 
-Two levers reduce what an LLM emits, and they are independent:
+Three independent levers reduce what an LLM emits:
 
 1. **Less code** — most generated code does not need to exist. The cheapest line
    is the one you never write.
 2. **Less prose** — most words around code are filler. The reader wants the
    answer, not the wind-up.
+3. **Denser agent-to-agent messages** — when the reader is another agent, not a
+   human, switch the wire format to the most token-efficient one it parses
+   losslessly. Situational: only fires on agent-to-agent channels.
 
-This skill applies both. Use them together: write the minimum code that needs to
-exist, then describe it in the fewest words that stay clear. The point is not to
-be terse for its own sake — it is that volume is cost, and most volume is waste.
+Levers 1–2 apply to everything you emit; Lever 3 applies only when output feeds
+another agent. Use them together: write the minimum code that needs to exist,
+describe it in the fewest words that stay clear, and when handing off to another
+agent, drop human formatting the machine doesn't need. The point is not to be
+terse for its own sake — it is that volume is cost, and most volume is waste.
 
 **Apply this reflexively, as a writing style — not as a problem to analyze.** Do
 not deliberate about which mode or rung applies, and do not spend
@@ -122,6 +127,56 @@ Terseness applies to prose, not to anything where precision is the point:
 
 The test: if compressing a sentence makes the reader do more work to recover the
 meaning, you've moved cost rather than removed it. Stop there.
+
+## Lever 3 — Compress agent-to-agent messages
+
+When the consumer of your output is **another agent, not a human** — a subagent
+return value, an orchestrator↔worker handoff, a structured payload an LLM reads
+back — drop human-readable formatting and use the densest format the receiver
+parses losslessly. No person reads this channel, so the usual "terseness must
+stay clear to the reader" limit (Lever 2) is replaced by "stay clear to the
+*parsing model*."
+
+This lever fires **only on agent-to-agent payloads.** Anything a human reads —
+your actual reply, code, explanations — stays under Levers 1–2. Never emit a
+compressed wire format as a user-facing answer.
+
+Pick the format by the **shape** of the data:
+
+1. **Uniform array of same-shaped records (the common, high-volume case) → TOON
+   tabular.** Write the field names once in a header, then one bare row per
+   record, with an explicit count:
+   ```
+   findings[3]{sev,issue}:
+     H,token never expires
+     M,no rate limiting on reset requests
+     L,no confirmation after password change
+   ```
+   This drops the per-row key repetition that dominates JSON's token cost — the
+   measured win is large (~60% fewer tokens vs prose, ~50% vs JSON) and lossless
+   on coverage. State the count (`[3]`) so the reader can detect truncation, and
+   keep delimiter characters out of values (or fall back to JSON if values can
+   contain the delimiter).
+
+2. **Everything else → compressed JSON.** Nested, irregular, heterogeneous, or
+   typed data; payloads with only one or two records (where TOON's header
+   overhead isn't amortized); or any handoff a schema validates. Minified, no
+   whitespace, short keys:
+   ```
+   {"f":[{"s":"H","i":"token never expires"}]}
+   ```
+   JSON keeps types explicit and stays schema-validatable, so it's the safe
+   default whenever TOON's tabular shape doesn't cleanly fit. When in doubt,
+   use it — a denser format that the receiver misparses costs more than it saved.
+
+**Verify on the read side.** A dense format makes a misparse *silent* — the
+receiving agent may confabulate instead of erroring visibly. When you consume a
+compact payload, treat its declared count as a checksum; when you emit one, make
+the structure explicit (`[N]`, valid JSON) so truncation is detectable.
+
+**Safety carve-out still applies.** A handoff carrying auth decisions, money,
+migrations, deletes, or anything irreversible stays explicit and
+schema-validated — never trade that channel's clarity for tokens.
 
 ## Modes
 
