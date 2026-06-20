@@ -13,8 +13,16 @@ coding task from 0 to 100 on three things only:
 
 Do NOT reward verbosity, pleasantries, or extra explanation. Do NOT penalize terseness,
 fragments, or a missing intro — a correct one-line answer with no prose deserves ~100.
-Judge substance, not tone or length. Reply with ONLY a JSON object:
-{"score": <int 0-100>, "note": "<= 12 words"}`;
+Judge substance, not tone or length.
+
+Critical anti-bias rules:
+- Delegating to a correct standard-library function is EXCELLENT engineering, not lower
+  quality. A one-line stdlib solution that meets the spec scores as high as a longer
+  hand-rolled one — never lower for "showing less work."
+- Do NOT assume a stdlib function is buggy. If unsure of its behavior, treat it as correct.
+- Judge ONLY against the task's stated requirements. Do not invent extra ones (e.g. if the
+  task asks for a float only on even-length input, do not penalize an int on odd-length).
+Reply with ONLY a JSON object: {"score": <int 0-100>, "note": "<= 12 words"}`;
 
 const SYSTEM_WEB = `You are a senior design engineer judging a user-facing web deliverable
 (a landing page or UI component). Score the DELIVERABLE itself from 0 to 100 on:
