@@ -86,6 +86,12 @@ simplify away:
 - **Security measures** — auth checks, escaping, secrets handling, anything that
   keeps the system safe.
 - **Accessibility basics** — labels, roles, keyboard paths in UI work.
+- **Visual/UX design when the deliverable is user-facing.** For landing pages,
+  marketing sites, and UI components, polish (layout depth, hero composition,
+  motion, responsive richness, on-brand visual hierarchy) *is* the requirement —
+  don't strip it as "speculative." Minimal markup that looks unfinished isn't
+  minimal, it's unfinished. The code ladder still applies to *structure* (no dead
+  markup, no unused framework) — but not at the cost of how the result looks.
 - **Anything the user explicitly asked for** — if they requested it, it is in
   scope by definition, even if you'd otherwise skip it.
 
