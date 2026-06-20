@@ -1,6 +1,6 @@
 # Per-use-case results
 
-model: `claude-opus-4-8` · sources: panel-v1
+model: `claude-opus-4-8` · sources: panel-v1, relay-v1
 
 Output Δ and judge Δ are vs **baseline** for that task. "Tests" = unit test (code) or structural/a11y checklist (web).
 
@@ -12,6 +12,15 @@ Output Δ and judge Δ are vs **baseline** for that task. "Tests" = unit test (c
 | caveman | 100% | 100 (99–100) | +1 | 112 | -20% |
 | ponytail | 100% | 99 (95–100) | +0 | 331 | +136% |
 | honey | 100% | 98 (95–100) | -1 | 155 | +11% |
+
+### config-relay  `relay` · agent-handoff
+
+| Variant | Tests | Accuracy | Acc Δ | Output tok | Output Δ |
+|---------|------:|------:|--------:|-----------:|---------:|
+| baseline | 100% | 100% | — | 289 | — |
+| caveman | 100% | 100% | +0 | 190 | -34% |
+| ponytail | 100% | 100% | +0 | 210 | -27% |
+| honey | 100% | 100% | +0 | 194 | -33% |
 
 ### csv-column-sum  `code` · parsing
 
@@ -30,6 +39,15 @@ Output Δ and judge Δ are vs **baseline** for that task. "Tests" = unit test (c
 | caveman | 100% | 95 (92–97) | -1 | 412 | -32% |
 | ponytail | 100% | 94 (88–100) | -3 | 783 | +30% |
 | honey | 100% | 95 (92–97) | -1 | 256 | -58% |
+
+### findings-relay  `relay` · agent-handoff
+
+| Variant | Tests | Accuracy | Acc Δ | Output tok | Output Δ |
+|---------|------:|------:|--------:|-----------:|---------:|
+| baseline | 100% | 100% | — | 843 | — |
+| caveman | 100% | 100% | +0 | 642 | -24% |
+| ponytail | 100% | 100% | +0 | 642 | -24% |
+| honey | 100% | 100% | +0 | 327 | -61% |
 
 ### flatten  `code` · algorithm
 

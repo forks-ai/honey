@@ -15,6 +15,7 @@ const path = require("path");
 const { extractCode } = require("./extract");
 const { grade } = require("./grade");
 const { gradeWeb } = require("./grade-web");
+const { receiverPrompt, parseAnswers, scoreRelay } = require("./relay");
 const eco = require("../../hooks/eco");
 
 const ROOT = path.join(__dirname, "..");
@@ -26,6 +27,7 @@ const flag = (name) => {
 };
 const MOCK = args.includes("--mock");
 const MODEL = process.env.MODEL || "claude-opus-4-8";
+const RECEIVER_MODEL = process.env.RECEIVER_MODEL || MODEL; // neutral decoder for relay tasks
 // Judge panel: median of N models cancels single-judge self-preference and noise.
 // Default to the model under test; pass JUDGE_MODELS=a,b,c for a panel.
 const JUDGE_MODELS = (process.env.JUDGE_MODELS || process.env.JUDGE_MODEL || MODEL)
@@ -66,7 +68,10 @@ function loadTasks() {
         meta,
         prompt: fs.readFileSync(path.join(base, "prompt.md"), "utf8").trim(),
         testPath: meta.test_file ? path.join(base, meta.test_file) : null,
-        refPath: meta.type === "web" ? null : path.join(base, `reference.${meta.lang === "python" ? "py" : "js"}`),
+        refPath:
+          meta.type === "web" || meta.type === "relay"
+            ? null
+            : path.join(base, `reference.${meta.lang === "python" ? "py" : "js"}`),
       };
     });
 }
@@ -98,6 +103,14 @@ if (MOCK) {
     "<section>Pricing</section></main><footer>©</footer></body></html>";
   const cachedSystems = new Set(); // simulate prompt caching: system billed fresh once per variant
   complete = async ({ system, user }) => {
+    // relay: encode call echoes the data; receiver call returns ground-truth answers
+    if (MOCK_TASK.meta.type === "relay") {
+      const text = /received a handoff/.test(user)
+        ? JSON.stringify(MOCK_TASK.meta.queries.map((q) => q.a))
+        : `handoff: ${MOCK_TASK.prompt.slice(0, 60)}`;
+      const sysTok = system ? Math.ceil(system.length / 4) : 0;
+      return { text, usage: { input: sysTok + Math.ceil(user.length / 4), output: Math.ceil(text.length / 4), cache_read: 0, cache_write: 0 } };
+    }
     const body =
       MOCK_TASK.meta.type === "web"
         ? STUB_HTML
@@ -142,46 +155,62 @@ const cfg = eco.loadConfig();
 async function runCell(task, variantName, system, run) {
   MOCK_TASK = task;
   MOCK_VARIANT = variantName;
-  const web = task.meta.type === "web";
+  const type = task.meta.type === "web" ? "web" : task.meta.type === "relay" ? "relay" : "code";
   const gen = await complete({
     model: MODEL,
     system,
     user: task.prompt,
-    maxTokens: web ? 8192 : 4096, // full pages need headroom
+    maxTokens: type === "web" ? 8192 : 4096, // full pages need headroom
     thinking: THINKING,
   });
-  const lang = task.meta.lang === "python" ? "python" : web ? "html" : "javascript";
+
+  const common = {
+    variant: variantName,
+    task: task.meta.id,
+    category: task.meta.category,
+    type,
+    run,
+    usage: gen.usage,
+    gco2: eco.estimate(MODEL, gen.usage.output, cfg).gco2,
+    reply: gen.text,
+  };
+
+  // Agent-to-agent: a neutral receiver decodes the handoff; quality = lossless recovery.
+  // No prose/design judge — the round-trip IS the quality measure.
+  if (type === "relay") {
+    MOCK_TASK = task; // re-pin for mock: set synchronously right before the receiver call
+    const rec = await complete({
+      model: RECEIVER_MODEL,
+      system: null,
+      user: receiverPrompt(gen.text, task.meta.queries),
+      maxTokens: 600,
+    });
+    const sc = scoreRelay(parseAnswers(rec.text, task.meta.queries.length), task.meta.queries);
+    return { ...common, passed: sc.passed, accuracy: sc.accuracy, grade_detail: sc.detail, judge: null };
+  }
+
+  const lang = task.meta.lang === "python" ? "python" : type === "web" ? "html" : "javascript";
   let code = extractCode(gen.text, lang);
-  if (web && !/<(html|body|main|section|div)\b/i.test(code)) code = gen.text; // raw, unfenced HTML
-  const g = web ? gradeWeb(task, code) : grade(task, code);
+  if (type === "web" && !/<(html|body|main|section|div)\b/i.test(code)) code = gen.text; // raw, unfenced HTML
+  const g = type === "web" ? gradeWeb(task, code) : grade(task, code);
 
   // judge panel: score with each model, headline = median (robust to one harsh/lenient judge)
   const panel = await Promise.all(
     JUDGE_MODELS.map((m) =>
-      judge({ model: m, taskPrompt: task.prompt, candidateOutput: gen.text, type: web ? "web" : "code" })
+      judge({ model: m, taskPrompt: task.prompt, candidateOutput: gen.text, type })
         .then((r) => ({ model: m, ...r }))
     )
   );
   const scores = panel.map((p) => p.score).filter((s) => s != null);
-  const judges = Object.fromEntries(panel.map((p) => [p.model, p.score]));
-
-  const { gco2 } = eco.estimate(MODEL, gen.usage.output, cfg);
   return {
-    variant: variantName,
-    task: task.meta.id,
-    category: task.meta.category,
-    type: web ? "web" : "code",
-    run,
-    usage: gen.usage,
+    ...common,
     passed: g.passed,
     grade_detail: g.detail,
     judge: median(scores),
     judge_min: scores.length ? Math.min(...scores) : null,
     judge_max: scores.length ? Math.max(...scores) : null,
-    judges,
+    judges: Object.fromEntries(panel.map((p) => [p.model, p.score])),
     judge_note: panel[0] ? panel[0].note : "",
-    gco2,
-    reply: gen.text,
   };
 }
 

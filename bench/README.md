@@ -68,7 +68,7 @@ and `raw/` (every full reply, for inspecting *why* a variant scored as it did).
 
 ## Tasks
 
-Two kinds, set by `meta.type`:
+Three kinds, set by `meta.type`:
 
 **`code`** — self-contained functions with a unit test. Pass = the extracted code runs green.
 
@@ -107,6 +107,21 @@ the easy code tasks can't separate.
 
 > A regex `@media`/`<section>`-count check produced false negatives (fluid flex/grid layouts
 > and `<header>`-based heros are valid), so those moved out of the gate and into the judge.
+
+**`relay`** — agent-to-agent handoffs (Honey's Lever 3). The variant encodes a structured
+payload for *another agent*; a neutral **receiver agent** (`RECEIVER_MODEL`) then answers
+ground-truth questions using ONLY that handoff (`src/relay.js`). There is no prose/design
+judge — quality is **lossless recovery**: did the receiver get every answer right? The win is
+fewer handoff tokens at no loss of recovery; the risk (a too-clever dense format the receiver
+silently misparses) shows up as dropped accuracy.
+
+| Task | Shape | Honey's Lever-3 move |
+|------|-------|----------------------|
+| `findings-relay` | uniform array of records | TOON tabular (header once + bare rows) |
+| `config-relay` | nested / irregular config | compact minified JSON |
+
+Result on these: every variant stays 100% lossless, and Honey cuts handoff tokens ~54%
+(−61% on the uniform array, where TOON shines).
 
 Add a `code` task: drop a folder in `tasks/` with `prompt.md`, `meta.json`, a `test.*`, and a
 `reference.*` (the reference must pass `verify-tests`). Add a `web` task: `prompt.md` + a
