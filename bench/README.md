@@ -74,8 +74,14 @@ Two kinds, set by `meta.type`:
 | `flatten` | py | algorithm | recursion depth, strings-as-leaves |
 | `median-bugfix` | py | bugfix | even-length + no mutation |
 | `csv-column-sum` | py | parsing | stdlib `csv` vs manual split |
+| `slugify` | py | string | regex vs char loop |
+| `parse-pagination` | py | validation | **carve-out**: clamp + reject bad input |
+| `format-bytes` | py | formatting | unit loop, rounding |
 | `parse-query` | js | parsing | repeated keys, `+`/`%20` |
 | `chunk` | js | algorithm | no mutation |
+| `memoize` | js | performance | cache key strategy |
+| `deep-merge` | js | data | **no-mutation**, nested recursion |
+| `retry-backoff` | js | async | retry count, throw last error |
 
 **`web`** — user-facing HTML/CSS where *polish is the spec*. Two signals:
 
