@@ -1,6 +1,6 @@
 # Headroom SmartCrusher — measured on honey's tokenizers
 
-Generated 2026-06-21. o200k = gpt-tokenizer; Claude = @anthropic-ai/tokenizer.
+Generated 2026-07-03. o200k = gpt-tokenizer; Claude = @anthropic-ai/tokenizer.
 SmartCrusher is LOSSY (drops rows → CCR cache). Deltas are NOT comparable to lossless TOON/ESF/columnar.
 
 ## Part A — real recorded Rust-core fixtures (input → crushed output)
