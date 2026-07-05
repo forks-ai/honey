@@ -48,9 +48,11 @@ ok("hook emits updatedToolOutput on storm", out.includes("updatedToolOutput") &&
 const handle = JSON.parse(out).hookSpecificOutput.updatedToolOutput.match(/eson retrieve (\w+)/)[1];
 ok("hook stashed original", fs.readFileSync(path.join(cache, `${handle}.json`), "utf8") === storm);
 
-// non-ultra → no output (passthrough)
+// any active mode fires; off → no output (passthrough)
 fs.writeFileSync(path.join(cfg, ".honey-active"), "full");
-ok("non-ultra passes through", run(bashStorm, envUltra) === "");
+ok("full mode fires too", run(bashStorm, envUltra).includes("updatedToolOutput"));
+fs.writeFileSync(path.join(cfg, ".honey-active"), "off");
+ok("off passes through", run(bashStorm, envUltra) === "");
 fs.writeFileSync(path.join(cfg, ".honey-active"), "ultra");
 
 // non-Bash tool → passthrough
