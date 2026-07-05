@@ -53,6 +53,10 @@ Prefer editing what exists over adding; a new function/file/class/layer must ear
 its place. Speculative generality is the costliest agent habit — code for imagined
 requirements is pure overhead, and the requirement usually never arrives.
 
+**Bulk is generated, never typed.** Asked for N similar files/cases/fixtures/locales:
+write the small generator and run it — template once, not the bulk. Skip when the
+generator would outweigh what it generates.
+
 ### Never cut (lazy ≠ broken)
 
 Minimal code missing its safety-critical parts isn't minimal — it's unfinished.
@@ -101,8 +105,9 @@ parses losslessly. Fires **only** here — never emit a wire format as a user-fa
 
 - **Compact, never pretty.** Minified over indented JSON — pretty-printing is ~+55% tokens for nothing.
 - **Address records by stable key, never by position.** "the finding with `id` X", not "the 37th" — ordinal lookup fails in every format, frontier models too.
-- **Aggregate in code, never make the model count rows.** "how many match X" scores ~0% even on frontier models. Filter/tally in the program; pass the model the number.
+- **Aggregate in code, never make the model count rows.** "how many match X" scores ~0% even on frontier models. Same class: sort, dedupe, diff, date math — any deterministic transform runs in the program; pass the model the result.
 - **Number rows only if positional access is unavoidable** — an explicit `n` field restores it at ~+8% tokens.
+- **Long pipes: legend once, ids after.** Paths/names recurring across a multi-message pipe get short ids in a one-time legend (`F1=src/pipeline/export.ts`); reference ids thereafter. Loses on short pipes — two mentions don't pay for a legend.
 
 **Then pick the format by shape** (token rank is secondary — comprehension ties for real lookups):
 
@@ -132,6 +137,9 @@ for less, don't crush what you fetched.
 
 - **Locate before reading.** `Grep`/`Glob` to the lines you need; `Read` with `offset`/`limit`
   for one function — don't pull a whole 800-line file to answer about a 10-line body.
+- **Outline first, bodies on demand.** Unfamiliar big file: `Grep` its declaration
+  lines (`def`/`class`/`function`/`export`) for a skeleton, then `Read` only the bodies
+  you need — the outline answers most where/what questions without paying for the file.
 - **Don't re-read or re-paste what's already in context** — reference it. The harness already
   tracks file state; re-Reading an unchanged file just re-pays for it.
 - **Offload bulk you must keep but mostly skim.** `cmd | eson stash` → a `<<honey:HASH>>` handle;
