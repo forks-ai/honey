@@ -39,3 +39,13 @@ hash from the sentinel and run `eson retrieve <hash>`.
 
 - Cache dir: `.honey-ccr/` (override with `HONEY_CCR_DIR`).
 - Below the size gate, `crush` returns the array unchanged with no sentinel — safe to pipe anything.
+
+## Always-on hook (entry-time GC)
+
+While Honey is active, a registered PostToolUse hook applies this automatically to
+Bash output — no opt-in per call. Big uniform JSON arrays (≥20 items, ≥2k chars) are
+crushed; repetitive text (≥25 lines) gets consecutive repeats collapsed to `⟨×N⟩`.
+The original is always stashed first, and the rewritten result ends with the exact
+`eson retrieve <hash>` command that restores it. `/honey off` disables the hook;
+history already in context is immutable — this fires at entry, the only place a
+hook can act.
