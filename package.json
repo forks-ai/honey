@@ -14,6 +14,7 @@
     "bench:eso": "node bench/eso/run.mjs",
     "bench:formats": "node bench/eso/formats.mjs",
     "bench:ccr": "node bench/headroom/run.mjs",
+    "bench:px": "node bench/px/run.mjs",
     "bench:ccr:comprehension": "node bench/headroom/comprehension.mjs",
     "bench:memory": "node bench/memory/run.mjs",
     "bench:all": "npm run bench:formats && npm run bench:ccr && npm run bench:ccr:comprehension",
@@ -35,6 +36,7 @@
   "devDependencies": {
     "@anthropic-ai/tokenizer": "^0.0.4",
     "@toon-format/toon": "^2.3.0",
-    "gpt-tokenizer": "^3.4.0"
+    "gpt-tokenizer": "^3.4.0",
+    "pxpipe-proxy": "^0.8.0"
   }
 }

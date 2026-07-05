@@ -131,6 +131,29 @@ answer accuracy, **100%** with retrieve — and the lone crushed miss was a refu
 hallucination. Benches: `npm run bench:ccr` (tokens) and `npm run bench:ccr:comprehension`
 (quality). The `honey-ccr` skill tells the agent when to reach for it.
 
+### PX — image-rendered reads for huge dense read-only bulk
+
+An image's token cost is fixed by its pixel area, not its character count — dense
+text packs ~3 chars per image-token vs ~1 as text. **PX** exploits the gap on the
+*read* path: render big read-only bulk (vendored code, large diffs, docs) to PNG
+pages with [pxpipe](https://github.com/teamchong/pxpipe)'s `export` and `Read` the
+images instead of the text.
+
+```bash
+npx pxpipe-proxy export --json --out "$TMPDIR" src/   # → page-*.png + factsheet.txt + token report
+```
+
+Benchmarked on repo corpora (`npm run bench:px`, [results](bench/px/RESULTS.md)):
+**−79…85% tokens** (26.4k text → 4.8k image est.), and an in-session Fable 5
+read-back scored 12/14 grep-verified facts — both misses long byte-exact strings,
+silently confabulated. **Lossy on exact strings** — misreads
+are silent confabulations, so the export ships verbatim precision tokens (paths,
+SHAs, numbers) as `factsheet.txt` text, and the `honey-px` skill forbids it for
+files you'll edit, secrets, or non-Fable readers. Complementary to CCR: CCR drops
+redundant rows recoverably; PX keeps everything in view at pixel prices. For the
+full wire-level version (system prompt, tool docs, history), run the pxpipe proxy
+itself — Honey and pxpipe stack.
+
 Pick Honey when you want the best quality-per-token, especially in Claude Code.
 
 ## Input precompression — a measured negative result
@@ -178,6 +201,7 @@ reach for at a specific moment.
 | `honey-compress` | satellite skill | rewrite a re-read memory file (CLAUDE.md, AGENTS.md) tersely to cut *input* tokens; backs up the original |
 | `honey-memory` | satellite skill | create + maintain one committed per-project `PROJECT.md` so agents stop re-discovering the same facts every cold session; stores only stable, not-in-the-code context, kept honest by living in git |
 | `honey-ccr` | satellite skill | crush huge redundant array tool output (logs, scan results) to a sampled view; lossy-but-recoverable via `eson crush`/`retrieve` |
+| `honey-px` | satellite skill | read huge dense *read-only* bulk as rendered PNG pages (`npx pxpipe-proxy export`) — image tokens scale with pixels, not chars: ~60–75% cheaper on token-dense content; lossy on exact strings, never for files you'll edit |
 | `honey-loop` | satellite skill | cost discipline for recurring `/loop` runs: cache-aware pacing (skip the 300s dead zone), event-driven-over-polling, no-change short-circuit, compact state handle, stop condition |
 | `honey-superpowers` | satellite skill | stack Honey onto Superpowers-style subagent workflows: the Honey directive to inject into each dispatch prompt (worker + reviewer variants). On Claude Code the plugin's `SubagentStart` hook injects it automatically |
 | `honey-hive` | guide skill | decide when to delegate to the hive vs. work inline |
