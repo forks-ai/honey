@@ -131,6 +131,53 @@ answer accuracy, **100%** with retrieve — and the lone crushed miss was a refu
 hallucination. Benches: `npm run bench:ccr` (tokens) and `npm run bench:ccr:comprehension`
 (quality). The `honey-ccr` skill tells the agent when to reach for it.
 
+### PX — image-rendered reads for huge dense read-only bulk
+
+**The intuition:** sending a file as text pays per character; sending an image
+pays per pixel, no matter how much text is crammed into it. So a "photo of the
+page" costs ~5× less than the page itself — and reading it has photo problems:
+the gist survives, an exact serial number might not.
+
+Concretely: dense text packs ~3 chars per image-token vs ~1 as text. **PX**
+exploits the gap on the *read* path: when the agent must skim something huge it
+will never edit (vendored code, a large diff, docs), it renders it to PNG pages
+with [pxpipe](https://github.com/teamchong/pxpipe)'s `export` and `Read`s the
+images instead of the text.
+
+```bash
+npx pxpipe-proxy export --json --out "$TMPDIR" src/   # → page-*.png + factsheet.txt + token report
+```
+
+**Measured: up to −85% tokens on a single read.** Repo-corpus bench
+(`npm run bench:px`, [results](bench/px/RESULTS.md)): **−79…85%**, −82% average
+(26.4k Claude text tokens → 4.8k image est.); ~−75% all-in per read after the
+factsheet + report overhead; pxpipe's own end-to-end proxy bill measures −59…70%
+at whole-workload level.
+
+**Comprehension is a Fable story.** The live 4-model panel
+(`node bench/px/comprehension.mjs` — 10 byte-exact questions, text vs render):
+
+| model | text | from render |
+|---|---:|---:|
+| Claude **Fable 5** | 10/10 | **7/10** |
+| Claude Opus 4.8 | 10/10 | 4/10 |
+| Claude Sonnet 4.6 | 10/10 | 4/10 |
+| Claude Haiku 4.5 | 10/10 | 1/10 |
+
+Only Fable-class models read renders usably — and even Fable is not byte-safe.
+**Lossy on exact strings** — misreads are silent confabulations (Haiku answered a
+seed question with `0x9e3779b9`, a constant that isn't in the file), so the export
+ships verbatim precision tokens (paths, SHAs, numbers) as `factsheet.txt` text, and
+the `honey-px` skill forbids it for files you'll edit, secrets, or non-Fable
+readers. Over the raw API, prepend the export's `prompt.txt` banner — Fable's
+safety layer refuses naked dense renders. Complementary to CCR: CCR drops
+redundant rows recoverably; PX keeps everything in view at pixel prices. At
+`/honey ultra` the core skill reaches for PX automatically on qualifying reads
+(big, dense, read-only); at other intensities it stays on-demand via `honey-px`.
+For the
+full wire-level version (system prompt, tool docs, history), run the pxpipe proxy
+itself — Honey and pxpipe stack.
+
 Pick Honey when you want the best quality-per-token, especially in Claude Code.
 
 ## Input precompression — a measured negative result
@@ -178,6 +225,7 @@ reach for at a specific moment.
 | `honey-compress` | satellite skill | rewrite a re-read memory file (CLAUDE.md, AGENTS.md) tersely to cut *input* tokens; backs up the original |
 | `honey-memory` | satellite skill | create + maintain one committed per-project `PROJECT.md` so agents stop re-discovering the same facts every cold session; stores only stable, not-in-the-code context, kept honest by living in git |
 | `honey-ccr` | satellite skill | crush huge redundant array tool output (logs, scan results) to a sampled view; lossy-but-recoverable via `eson crush`/`retrieve` |
+| `honey-px` | satellite skill | read huge dense *read-only* bulk as rendered PNG pages (`npx pxpipe-proxy export`) — image tokens scale with pixels, not chars: **up to −85%** on token-dense content (Fable-class readers only); lossy on exact strings, never for files you'll edit |
 | `honey-loop` | satellite skill | cost discipline for recurring `/loop` runs: cache-aware pacing (skip the 300s dead zone), event-driven-over-polling, no-change short-circuit, compact state handle, stop condition |
 | `honey-superpowers` | satellite skill | stack Honey onto Superpowers-style subagent workflows: the Honey directive to inject into each dispatch prompt (worker + reviewer variants). On Claude Code the plugin's `SubagentStart` hook injects it automatically |
 | `honey-hive` | guide skill | decide when to delegate to the hive vs. work inline |

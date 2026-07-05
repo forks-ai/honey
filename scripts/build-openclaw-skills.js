@@ -23,6 +23,7 @@ const DESCRIPTIONS = {
   'honey-gain': "Show Honey's benchmark scoreboard: committed quality and token results per task tier vs Caveman, Ponytail, and no-skill. One-shot.",
   'honey-eco': "Report the session's Honey savings: output tokens, CO2, and CO2/$ saved vs a no-Honey baseline, via the committed EcoLogits port.",
   'honey-ccr': 'Compress-Cache-Retrieve huge repetitive array tool output before it hits context: keep a sample, cache the rest, leave a hash.',
+  'honey-px': 'Read huge dense read-only text as PNG pages via pxpipe export: ~60-75% fewer input tokens. Lossy on exact strings; never for files you will edit.',
   'honey-compress': 'Rewrite a memory or context file (CLAUDE.md, AGENTS.md, notes) into Honey-terse form to cut per-session input tokens. Backs up first.',
   'honey-hive': "Delegate search- and review-heavy work to Honey's read-only subagents so large reads return compressed instead of bloating context.",
   'honey-memory': 'Per-project persistent memory: save and recall durable facts across sessions as small frontmatter files, indexed in MEMORY.md.',
