@@ -337,7 +337,7 @@ PATH. Safe to re-run; skips tools you don't have.
 | GitHub Copilot (editor) | copy `.github/copilot-instructions.md` into your project |
 | Kiro | copy `.kiro/steering/honey.md` (project or `~/.kiro/steering/`) |
 | OpenCode | copy `.opencode/AGENTS.md` into your project, then register it in `opencode.json` (`"instructions": [".opencode/AGENTS.md"]`) — or copy it to global `~/.config/opencode/AGENTS.md`. OpenCode does not auto-load a nested `.opencode/AGENTS.md`. |
-| Kilo Code | copy `.kilo/rules/honey.md` into your project (auto-discovered; legacy `.kilocode/` not used) |
+| Kilo Code | copy `.kilo/rules/honey.md` into your project (auto-discovered; `.kilocode/rules/` also works) |
 | Aider / Zed / any AGENTS.md reader | copy `AGENTS.md` into your project |
 
 All of these are also handled automatically by the one-line installer. See

@@ -62,8 +62,8 @@ const TARGETS = [
     wrap: (body) => `${BANNER}\n\n${body}`,
   },
   {
-    // Kilo Code (post-rename): auto-discovered project rules under `.kilo/rules/`.
-    // The legacy `.kilocode/` layout is intentionally not used. See kilo.jsonc config.
+    // Kilo Code: reads both `.kilo/rules/` and `.kilocode/rules/`; we emit the
+    // newer `.kilo/` layout. Auto-injected into instructions at engine startup.
     path: ".kilo/rules/honey.md",
     wrap: (body) => `${BANNER}\n\n${body}`,
   },
